@@ -9,9 +9,9 @@
               v-model="data.email"
               id="email"
               type="email"
-              placeholder="entrez votre email"
+              placeholder="Entrez votre email"
               class="input"
-              @input="inputHandler"
+              @input="inputHandler('email')"
             />
             <p v-if="error.email" class="error">{{ error.email }}</p>
           </article>
@@ -21,9 +21,11 @@
               v-model="data.password"
               id="password"
               type="password"
-              placeholder="entrez votre mot de passe"
+              placeholder="Entrez votre mot de passe"
               class="input"
+              @input="inputHandler('password')"
             />
+            <p v-if="error.password" class="error">{{ error.password }}</p>
           </article>
         </section>
         <section>
@@ -43,30 +45,53 @@
   });
   
   const error = reactive({
-    email: ""
+    email: "",
+    password: ""
   });
   
-  // Pattern pour vérifier une adresse email valide
+  // Patterns de validation
   const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+  const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
   
-  const isUserInputValid = (input: string): boolean => {
-    return emailPattern.test(input);
+  const isUserInputValid = (input: string, type: string): boolean => {
+    if (type === "email") return emailPattern.test(input);
+    if (type === "password") return passwordPattern.test(input);
+    return false;
   };
   
   const submitHandler = () => {
-    if (isUserInputValid(data.email)) {
-      console.log("Email valide :", data.email);
-    } else {
-      console.error("Email invalide :", data.email);
+    let isValid = true;
+  
+    if (!isUserInputValid(data.email, "email")) {
       error.email = "Veuillez entrer une adresse email valide.";
+      isValid = false;
+    } else {
+      error.email = "";
+    }
+  
+    if (!isUserInputValid(data.password, "password")) {
+      error.password =
+        "Le mot de passe doit contenir au moins 8 caractères, une majuscule, une minuscule, un chiffre et un caractère spécial.";
+      isValid = false;
+    } else {
+      error.password = "";
+    }
+  
+    if (isValid) {
+      console.log("Formulaire valide :", data);
+    } else {
+      console.error("Formulaire invalide :", data);
     }
   };
   
-  const inputHandler = () => {
-    if (isUserInputValid(data.email)) {
-      error.email = "";
-    } else {
-      error.email = "Format de l'email incorrect.";
+  const inputHandler = (type: string) => {
+    if (type === "email") {
+      error.email = isUserInputValid(data.email, "email") ? "" : "Format de l'email incorrect.";
+    }
+    if (type === "password") {
+      error.password = isUserInputValid(data.password, "password")
+        ? ""
+        : "Le mot de passe doit contenir au moins 8 caractères, une majuscule, une minuscule, un chiffre et un caractère spécial.";
     }
   };
   
@@ -74,4 +99,5 @@
     console.log("Changement dans la variable data", val);
   });
   </script>
+
   
